@@ -23,9 +23,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import de.haw.fuzzy.exception.ConnectionException;
-import de.haw.fuzzy.exception.IllegalArgumentException;
-import de.haw.fuzzy.exception.InternalErrorException;
+import de.haw.model.exception.ConnectionException;
+import de.haw.model.exception.IllegalArgumentException;
+import de.haw.model.exception.InternalErrorException;
 
 public class FuzzyImpl implements Fuzzy {
 	
@@ -67,7 +67,7 @@ public class FuzzyImpl implements Fuzzy {
 			this.targetURL = API_URL + "?q=" + this.makeUTF8(word);
 		} 
 		catch (Exception e)
-		{throw new InternalErrorException(); }
+		{throw new InternalErrorException(""); }
 
 		return this.getSynonymXML(word, opt);
 //		return this.getSynonymJSON(word, opt);
@@ -94,34 +94,22 @@ public class FuzzyImpl implements Fuzzy {
 		}
 
 		if ((opt & FuzzyImpl.SYNSETS) == FuzzyImpl.SYNSETS) {
-			try {
-				this.getTermXML(doc.getElementsByTagName("synset"), results);
-			} catch (JSONException e) {
-			}
+			this.getTermXML(doc.getElementsByTagName("synset"), results);
 		}
 
 		if ((opt & FuzzyImpl.SIMILARTERMS) == FuzzyImpl.SIMILARTERMS) {
-			try {
-				this.getTermXML(doc.getElementsByTagName("similarterms"),
-						results);
-			} catch (JSONException e) {
-			}
+			this.getTermXML(doc.getElementsByTagName("similarterms"),
+					results);
 		}
 
 		if ((opt & FuzzyImpl.SUBSTRINGTERMS) == FuzzyImpl.SUBSTRINGTERMS) {
-			try {
-				this.getTermXML(doc.getElementsByTagName("substringterms"),
-						results);
-			} catch (JSONException e) {
-			}
+			this.getTermXML(doc.getElementsByTagName("substringterms"),
+					results);
 		}
 
 		if ((opt & FuzzyImpl.STARTSWITHTERMS) == FuzzyImpl.STARTSWITHTERMS) {
-			try {
-				this.getTermXML(doc.getElementsByTagName("startswithterms"),
-						results);
-			} catch (JSONException e) {
-			}
+			this.getTermXML(doc.getElementsByTagName("startswithterms"),
+					results);
 		}
 
 		return results.keySet().toArray(new String[0]);
@@ -133,7 +121,12 @@ public class FuzzyImpl implements Fuzzy {
 
 		HashMap<String, String> results = new HashMap<String, String>();
 
-		JSONObject obj = new JSONObject(this.getSearch());
+		JSONObject obj = null;
+		try {
+			obj = new JSONObject(this.getSearch());
+		} catch (JSONException e1) {
+			e1.printStackTrace();
+		}
 
 		if ((opt & FuzzyImpl.SYNSETS) == FuzzyImpl.SYNSETS) {
 			try {
@@ -186,7 +179,12 @@ public class FuzzyImpl implements Fuzzy {
 
 	private void getTermJSON(JSONArray arr, HashMap<String, String> results) {
 		for (int i = 0; i < arr.length(); i++) {
-			JSONObject obj = arr.getJSONObject(i);
+			JSONObject obj = null;
+			try {
+				obj = arr.getJSONObject(i);
+			} catch (JSONException e1) {
+				e1.printStackTrace();
+			}
 			try {
 				String tmp = obj.getString("term");
 
